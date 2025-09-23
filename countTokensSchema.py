@@ -67,9 +67,6 @@ def parse_log_messages(log_data: List[Dict[str, Any]], include_system: bool = Tr
                     if "tool_calls" in additional_kwargs:
                         # Has tool_calls -> assistant message
                         role = "assistant"
-                    elif "name" in additional_kwargs:
-                        # Has name only -> user message
-                        role = "user"
                     else:
                         # Unknown additional_kwargs pattern, skip
                         continue
