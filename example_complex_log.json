@@ -1,0 +1,42 @@
+[
+    {
+        "role": "user",
+        "content": "Tôi muốn tìm hiểu về quy định nhân viên đi muộn"
+    },
+    {
+        "content": "Bạn là AI assistant hỗ trợ tra cứu quy định công ty."
+    },
+    {
+        "content": "",
+        "additional_kwargs": {
+            "tool_calls": [
+                {
+                    "id": "tooluse_7Z_JGRx1SNyAHdBLq3Ce4g",
+                    "function": {
+                        "arguments": {
+                            "input": "nhân viên kinh doanh đi muộn số lần cho phép tháng"
+                        },
+                        "name": "CMCTSRetriever"
+                    },
+                    "type": "function",
+                    "index": 0
+                }
+            ]
+        }
+    },
+    {
+        "content": [
+            "Theo quy định của công ty, nhân viên kinh doanh được phép đi muộn tối đa 3 lần trong 1 tháng."
+        ],
+        "additional_kwargs": {
+            "name": "CMCTSRetriever"
+        }
+    },
+    {
+        "role": "assistant",
+        "content": "Dựa trên thông tin tìm được, nhân viên kinh doanh được phép đi muộn tối đa 3 lần trong 1 tháng theo quy định của công ty. Bạn có cần thêm thông tin gì khác không?"
+    },
+    {
+        "content": "Luôn cung cấp thông tin chính xác và trích dẫn nguồn."
+    }
+]

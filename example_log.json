@@ -1,0 +1,24 @@
+[
+    {
+        "role": "user",
+        "content": "Xin chào, bạn có thể giúp tôi tạo một schema cho AWS Bedrock không?"
+    },
+    {
+        "role": "assistant", 
+        "content": "Chào bạn! Tôi có thể giúp bạn tạo schema cho AWS Bedrock count_tokens API. Bạn cần schema cho loại input nào?"
+    },
+    {
+        "content": "Bạn là một AI assistant chuyên về AWS Bedrock và có thể giúp tạo JSON schema chuẩn."
+    },
+    {
+        "role": "user",
+        "content": "Tôi cần convert log messages từ format cũ sang format mới"
+    },
+    {
+        "role": "assistant",
+        "content": "Tôi hiểu rồi. Bạn có thể sử dụng tính năng Import Log trong ứng dụng để convert format cũ sang format AWS Bedrock chuẩn."
+    },
+    {
+        "content": "Luôn trả lời bằng tiếng Việt và cung cấp thông tin chính xác."
+    }
+]

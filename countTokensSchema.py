@@ -3,7 +3,7 @@ import json
 import base64
 from typing import Dict, Any, List, Optional
 
-def parse_log_messages(log_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+def parse_log_messages(log_data: List[Dict[str, Any]], include_system: bool = True) -> Dict[str, Any]:
     """
     Convert log messages format to AWS Bedrock schema format
     
@@ -11,7 +11,9 @@ def parse_log_messages(log_data: List[Dict[str, Any]]) -> Dict[str, Any]:
     [
         0: {"role": "user", "content": "..."},
         1: {"role": "assistant", "content": "..."},
-        2: {"content": "..."} # system prompt (no role)
+        2: {"content": "..."} # system prompt (no role, no additional_kwargs)
+        3: {"content": "", "additional_kwargs": {"tool_calls": [...]}} # assistant message
+        4: {"content": [...], "additional_kwargs": {"name": "..."}} # user message
     ]
     
     Output format:
@@ -25,14 +27,8 @@ def parse_log_messages(log_data: List[Dict[str, Any]]) -> Dict[str, Any]:
     
     for item in log_data:
         if isinstance(item, dict):
-            # Check if it's a system prompt (no role, only content)
-            if "role" not in item and "content" in item:
-                # System prompt
-                system_messages.append({
-                    "text": str(item["content"])
-                })
-            elif "role" in item and "content" in item:
-                # Regular message with role
+            if "role" in item:
+                # Regular message with explicit role
                 role = item["role"]
                 content = item["content"]
                 
@@ -54,11 +50,43 @@ def parse_log_messages(log_data: List[Dict[str, Any]]) -> Dict[str, Any]:
                     "role": role,
                     "content": formatted_content
                 })
+                
+            elif "role" not in item:
+                # No explicit role - need to determine type
+                if "additional_kwargs" not in item:
+                    # No role, no additional_kwargs -> system prompt
+                    if "content" in item and include_system:
+                        system_messages.append({
+                            "text": str(item["content"])
+                        })
+                        
+                elif "additional_kwargs" in item:
+                    # Has additional_kwargs - determine role based on content
+                    additional_kwargs = item["additional_kwargs"]
+                    
+                    if "tool_calls" in additional_kwargs:
+                        # Has tool_calls -> assistant message
+                        role = "assistant"
+                    elif "name" in additional_kwargs:
+                        # Has name only -> user message
+                        role = "user"
+                    else:
+                        # Unknown additional_kwargs pattern, skip
+                        continue
+                    
+                    # Content is the entire element as string
+                    content_str = json.dumps(item, ensure_ascii=False)
+                    formatted_content = [{"text": content_str}]
+                    
+                    messages.append({
+                        "role": role,
+                        "content": formatted_content
+                    })
     
     # Build result
     result = {"messages": messages}
-    if system_messages:
-        result["system"] = system_messages[0]
+    if system_messages and include_system:
+        result["system"] = system_messages
     
     return result
 
@@ -444,6 +472,20 @@ def main():
             st.subheader("📥 Import Log Messages")
             st.markdown("**Import và convert log messages từ format cũ sang schema chuẩn**")
             
+            # Options
+            col_opt1, col_opt2 = st.columns(2)
+            with col_opt1:
+                include_system = st.checkbox(
+                    "**Bao gồm system prompts**",
+                    value=True,
+                    help="Có convert các dict không có 'role' thành system prompts hay không"
+                )
+            with col_opt2:
+                if include_system:
+                    st.info("ℹ️ Dict không có 'role' và 'additional_kwargs' sẽ được convert thành system prompts")
+                else:
+                    st.warning("⚠️ Dict không có 'role' và 'additional_kwargs' sẽ bị bỏ qua")
+            
             # Log input area
             log_content = st.text_area(
                 "**Paste Log JSON:**",
@@ -461,7 +503,11 @@ def main():
         "content": "You are a helpful assistant."
     }
 ]''',
-                help="Paste log messages ở đây. Dict không có 'role' sẽ được coi là system prompt."
+                help="""Paste log messages ở đây. Logic xử lý:
+• Dict có 'role' -> message thông thường
+• Dict không có 'role' và không có 'additional_kwargs' -> system prompt (nếu được bật)
+• Dict không có 'role' nhưng có 'additional_kwargs' với 'tool_calls' -> assistant message
+• Dict không có 'role' nhưng có 'additional_kwargs' với 'name' -> user message"""
             )
             
             if log_content:
@@ -473,13 +519,16 @@ def main():
                         st.error("❌ Log data phải là một array/list")
                     else:
                         # Convert using our parse function
-                        converted_data = parse_log_messages(log_data)
+                        converted_data = parse_log_messages(log_data, include_system=include_system)
                         
                         # Update session state
                         st.session_state.schema_data['input'] = {"converse": converted_data}
                         
                         # Show preview
-                        st.success("✅ Log đã được convert thành công!")
+                        if include_system and "system" in converted_data:
+                            st.success(f"✅ Log đã được convert thành công! ({len(converted_data['messages'])} messages, {len(converted_data['system'])} system prompts)")
+                        else:
+                            st.success(f"✅ Log đã được convert thành công! ({len(converted_data['messages'])} messages)")
                         
                         with st.expander("👀 Preview Converted Data", expanded=True):
                             st.json(converted_data)
@@ -597,7 +646,7 @@ def main():
             ]
             
             # Convert using our function
-            converted_data = parse_log_messages(example_log)
+            converted_data = parse_log_messages(example_log, include_system=True)
             
             st.session_state.schema_data = {
                 'modelId': 'anthropic.claude-3-5-sonnet-20241022-v2:0',

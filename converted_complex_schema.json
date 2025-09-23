@@ -1,0 +1,49 @@
+{
+  "modelId": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+  "input": {
+    "converse": {
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "text": "Tôi muốn tìm hiểu về quy định nhân viên đi muộn"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "text": "{\"content\": \"\", \"additional_kwargs\": {\"tool_calls\": [{\"id\": \"tooluse_7Z_JGRx1SNyAHdBLq3Ce4g\", \"function\": {\"arguments\": {\"input\": \"nhân viên kinh doanh đi muộn số lần cho phép tháng\"}, \"name\": \"CMCTSRetriever\"}, \"type\": \"function\", \"index\": 0}]}}"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "text": "{\"content\": [\"Theo quy định của công ty, nhân viên kinh doanh được phép đi muộn tối đa 3 lần trong 1 tháng.\"], \"additional_kwargs\": {\"name\": \"CMCTSRetriever\"}}"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "text": "Dựa trên thông tin tìm được, nhân viên kinh doanh được phép đi muộn tối đa 3 lần trong 1 tháng theo quy định của công ty. Bạn có cần thêm thông tin gì khác không?"
+            }
+          ]
+        }
+      ],
+      "system": [
+        {
+          "text": "Bạn là AI assistant hỗ trợ tra cứu quy định công ty."
+        },
+        {
+          "text": "Luôn cung cấp thông tin chính xác và trích dẫn nguồn."
+        }
+      ]
+    }
+  }
+}

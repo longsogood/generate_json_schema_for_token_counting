@@ -1,0 +1,49 @@
+{
+  "modelId": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+  "input": {
+    "converse": {
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "text": "Xin chào, bạn có thể giúp tôi tạo một schema cho AWS Bedrock không?"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "text": "Chào bạn! Tôi có thể giúp bạn tạo schema cho AWS Bedrock count_tokens API. Bạn cần schema cho loại input nào?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "text": "Tôi cần convert log messages từ format cũ sang format mới"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "text": "Tôi hiểu rồi. Bạn có thể sử dụng tính năng Import Log trong ứng dụng để convert format cũ sang format AWS Bedrock chuẩn."
+            }
+          ]
+        }
+      ],
+      "system": [
+        {
+          "text": "Bạn là một AI assistant chuyên về AWS Bedrock và có thể giúp tạo JSON schema chuẩn."
+        },
+        {
+          "text": "Luôn trả lời bằng tiếng Việt và cung cấp thông tin chính xác."
+        }
+      ]
+    }
+  }
+}

@@ -118,8 +118,41 @@ def test_parse_log_messages():
     assert "system" not in result_5
     print("✅ Test Case 5 PASSED")
     
+    # Test case 6: Test với include_system=False
+    print("\n📝 Test Case 6: Test với include_system=False")
+    test_data_6 = [
+        {"role": "user", "content": "Hello"},
+        {"content": "You are helpful"}, # System prompt sẽ bị bỏ qua
+        {"role": "assistant", "content": "Hi there!"}
+    ]
+    
+    result_6 = parse_log_messages(test_data_6, include_system=False)
+    print("Input:")
+    print(json.dumps(test_data_6, indent=2, ensure_ascii=False))
+    print("\nOutput (include_system=False):")
+    print(json.dumps(result_6, indent=2, ensure_ascii=False))
+    
+    # Validate result
+    assert "messages" in result_6
+    assert "system" not in result_6  # System prompts should be excluded
+    assert len(result_6["messages"]) == 2
+    print("✅ Test Case 6 PASSED")
+    
+    # Test case 7: Test với include_system=True (default)
+    print("\n📝 Test Case 7: Test với include_system=True (default)")
+    result_7 = parse_log_messages(test_data_6, include_system=True)
+    print("Output (include_system=True):")
+    print(json.dumps(result_7, indent=2, ensure_ascii=False))
+    
+    # Validate result
+    assert "messages" in result_7
+    assert "system" in result_7  # System prompts should be included
+    assert len(result_7["messages"]) == 2
+    assert len(result_7["system"]) == 1
+    print("✅ Test Case 7 PASSED")
+
     print("\n" + "=" * 50)
-    print("🎉 All tests PASSED! Function works correctly.")
+    print("🎉 All tests PASSED! Function works correctly with include_system option.")
 
 if __name__ == "__main__":
     test_parse_log_messages()
