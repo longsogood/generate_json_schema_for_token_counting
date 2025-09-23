@@ -58,7 +58,7 @@ def parse_log_messages(log_data: List[Dict[str, Any]]) -> Dict[str, Any]:
     # Build result
     result = {"messages": messages}
     if system_messages:
-        result["system"] = system_messages
+        result["system"] = system_messages[0]
     
     return result
 
