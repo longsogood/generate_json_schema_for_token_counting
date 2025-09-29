@@ -11,9 +11,10 @@ def parse_log_messages(log_data: List[Dict[str, Any]], include_system: bool = Tr
     [
         0: {"role": "user", "content": "..."},
         1: {"role": "assistant", "content": "..."},
-        2: {"content": "..."} # system prompt (no role, no additional_kwargs)
+        2: {"content": "..."} # system prompt (no role, no additional_kwargs) - lần đầu
         3: {"content": "", "additional_kwargs": {"tool_calls": [...]}} # assistant message
         4: {"content": [...], "additional_kwargs": {"name": "..."}} # user message
+        5: {"content": "..."} # user message (no role, no additional_kwargs) - từ lần 2 trở đi
     ]
     
     Output format:
@@ -24,6 +25,7 @@ def parse_log_messages(log_data: List[Dict[str, Any]], include_system: bool = Tr
     """
     messages = []
     system_messages = []
+    no_role_no_kwargs_count = 0  # Đếm số lần gặp item không có role và additional_kwargs
     
     for item in log_data:
         if isinstance(item, dict):
@@ -54,11 +56,40 @@ def parse_log_messages(log_data: List[Dict[str, Any]], include_system: bool = Tr
             elif "role" not in item:
                 # No explicit role - need to determine type
                 if "additional_kwargs" not in item:
-                    # No role, no additional_kwargs -> system prompt
-                    if "content" in item and include_system:
-                        system_messages.append({
-                            "text": str(item["content"])
-                        })
+                    # No role, no additional_kwargs
+                    no_role_no_kwargs_count += 1
+                    
+                    # Kiểm tra xem có phải là system prompt không
+                    # Logic mới: Tất cả items không có role và additional_kwargs đều có thể là system prompts
+                    # nếu include_system=True, hoặc user messages nếu include_system=False
+                    if "content" in item:
+                        content = item["content"]
+                        
+                        if include_system:
+                            # Thêm vào system messages
+                            system_messages.append({
+                                "text": str(content)
+                            })
+                        else:
+                            # Convert thành user message
+                            # Convert content to proper format
+                            if isinstance(content, str):
+                                # Simple text content
+                                formatted_content = [{"text": content}]
+                            elif isinstance(content, list):
+                                # Already in list format, keep as is
+                                formatted_content = content
+                            elif isinstance(content, dict):
+                                # Single content object, wrap in list
+                                formatted_content = [content]
+                            else:
+                                # Fallback: convert to text
+                                formatted_content = [{"text": str(content)}]
+                            
+                            messages.append({
+                                "role": "user",
+                                "content": formatted_content
+                            })
                         
                 elif "additional_kwargs" in item:
                     # Has additional_kwargs - determine role based on content
@@ -479,9 +510,9 @@ def main():
                 )
             with col_opt2:
                 if include_system:
-                    st.info("ℹ️ Dict không có 'role' và 'additional_kwargs' sẽ được convert thành system prompts")
+                    st.info("ℹ️ Dict không có 'role' và 'additional_kwargs': lần đầu -> system prompt, từ lần 2 -> user message")
                 else:
-                    st.warning("⚠️ Dict không có 'role' và 'additional_kwargs' sẽ bị bỏ qua")
+                    st.warning("⚠️ Dict không có 'role' và 'additional_kwargs': lần đầu bị bỏ qua, từ lần 2 -> user message")
             
             # Log input area
             log_content = st.text_area(
@@ -502,7 +533,7 @@ def main():
 ]''',
                 help="""Paste log messages ở đây. Logic xử lý:
 • Dict có 'role' -> message thông thường
-• Dict không có 'role' và không có 'additional_kwargs' -> system prompt (nếu được bật)
+• Dict không có 'role' và không có 'additional_kwargs' -> lần đầu: system prompt (nếu được bật), từ lần 2: user message
 • Dict không có 'role' nhưng có 'additional_kwargs' với 'tool_calls' -> assistant message
 • Dict không có 'role' nhưng có 'additional_kwargs' với 'name' -> user message"""
             )
