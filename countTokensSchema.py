@@ -59,19 +59,18 @@ def parse_log_messages(log_data: List[Dict[str, Any]], include_system: bool = Tr
                     # No role, no additional_kwargs
                     no_role_no_kwargs_count += 1
                     
-                    # Kiểm tra xem có phải là system prompt không
-                    # Logic mới: Tất cả items không có role và additional_kwargs đều có thể là system prompts
-                    # nếu include_system=True, hoặc user messages nếu include_system=False
                     if "content" in item:
                         content = item["content"]
                         
-                        if include_system:
-                            # Thêm vào system messages
-                            system_messages.append({
-                                "text": str(content)
-                            })
+                        if no_role_no_kwargs_count == 1:
+                            # Lần đầu tiên -> system prompt (nếu include_system=True)
+                            if include_system:
+                                system_messages.append({
+                                    "text": str(content)
+                                })
+                            # Nếu include_system=False, bỏ qua item này (không làm gì)
                         else:
-                            # Convert thành user message
+                            # Từ lần thứ hai trở đi -> user message
                             # Convert content to proper format
                             if isinstance(content, str):
                                 # Simple text content
@@ -512,7 +511,7 @@ def main():
                 if include_system:
                     st.info("ℹ️ Dict không có 'role' và 'additional_kwargs': lần đầu -> system prompt, từ lần 2 -> user message")
                 else:
-                    st.warning("⚠️ Dict không có 'role' và 'additional_kwargs': lần đầu bị bỏ qua, từ lần 2 -> user message")
+                    st.warning("⚠️ Dict không có 'role' và 'additional_kwargs': lần đầu bị bỏ qua, từ lần 2 trở đi -> user message")
             
             # Log input area
             log_content = st.text_area(
